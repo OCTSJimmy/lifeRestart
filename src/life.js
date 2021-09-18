@@ -25,6 +25,7 @@ class Life {
           json('events'),
           json('achievement'),
         ])
+        console.log(age);
         this.#property.initial({age});
         this.#talent.initial({talents});
         this.#event.initial({events});

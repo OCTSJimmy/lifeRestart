@@ -52,9 +52,11 @@ async function debug() {
         }
         lifeTrajectory.push(trajectory);
         const { age, content } = trajectory;
+        let tmp = String(age);
+        tmp = tmp.split(".");
         console.debug(
             `---------------------------------`,
-            `\n-- ${age} 岁\n   `,
+            `\n-- ${tmp[0]} 岁${tmp[1]} 月\n   `,
             content.map(
                 ({type, description, rate, name, postEvent}) => {
                     switch(type) {

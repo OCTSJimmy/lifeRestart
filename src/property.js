@@ -1,7 +1,8 @@
-import { max, min, sum, clone, listRandom } from './functions/util.js';
+import {max, min, sum, clone, listRandom} from './functions/util.js';
 
 class Property {
-    constructor() {}
+    constructor() {
+    }
 
     TYPES = {
         // 本局
@@ -66,23 +67,23 @@ class Property {
     initial({age}) {
 
         this.#ageData = age;
-        for(const a in age) {
-            let { event, talent } = age[a];
-            if(!Array.isArray(event))
+        for (const a in age) {
+            let {event, talent} = age[a];
+            if (!Array.isArray(event))
                 event = event?.split(',') || [];
 
-            event = event.map(v=>{
-                const value = `${v}`.split('*').map(n=>Number(n));
-                if(value.length==1) value.push(1);
+            event = event.map(v => {
+                const value = `${v}`.split('*').map(n => Number(n));
+                if (value.length == 1) value.push(1);
                 return value;
             });
 
-            if(!Array.isArray(talent))
+            if (!Array.isArray(talent))
                 talent = talent?.split(',') || [];
 
-            talent = talent.map(v=>Number(v));
+            talent = talent.map(v => Number(v));
 
-            age[a] = { event, talent };
+            age[a] = {event, talent};
         }
     }
 
@@ -115,7 +116,7 @@ class Property {
             [this.TYPES.HMNY]: -Infinity,
             [this.TYPES.HSPR]: -Infinity,
         };
-        for(const key in data)
+        for (const key in data)
             this.change(key, data[key]);
     }
 
@@ -135,7 +136,7 @@ class Property {
     }
 
     get(prop) {
-        switch(prop) {
+        switch (prop) {
             case this.TYPES.AGE:
             case this.TYPES.CHR:
             case this.TYPES.INT:
@@ -173,7 +174,7 @@ class Property {
                 const HSTR = this.get(this.TYPES.HSTR);
                 const HMNY = this.get(this.TYPES.HMNY);
                 const HSPR = this.get(this.TYPES.HSPR);
-                return Math.floor(sum(HCHR, HINT, HSTR, HMNY, HSPR)*2 + HAGE/2);
+                return Math.floor(sum(HCHR, HINT, HSTR, HMNY, HSPR) * 2 + HAGE / 2);
             case this.TYPES.TMS:
                 return this.lsget('times') || 0;
             case this.TYPES.EXT:
@@ -188,33 +189,44 @@ class Property {
                 return this.get(
                     this.fallback(prop)
                 ).length;
-            default: return 0;
+            default:
+                return 0;
         }
     }
 
     fallback(prop) {
-        switch(prop) {
+        switch (prop) {
             case this.TYPES.LAGE:
-            case this.TYPES.HAGE: return this.TYPES.AGE;
+            case this.TYPES.HAGE:
+                return this.TYPES.AGE;
             case this.TYPES.LCHR:
-            case this.TYPES.HCHR: return this.TYPES.CHR;
+            case this.TYPES.HCHR:
+                return this.TYPES.CHR;
             case this.TYPES.LINT:
-            case this.TYPES.HINT: return this.TYPES.INT;
+            case this.TYPES.HINT:
+                return this.TYPES.INT;
             case this.TYPES.LSTR:
-            case this.TYPES.HSTR: return this.TYPES.STR;
+            case this.TYPES.HSTR:
+                return this.TYPES.STR;
             case this.TYPES.LMNY:
-            case this.TYPES.HMNY: return this.TYPES.MNY;
+            case this.TYPES.HMNY:
+                return this.TYPES.MNY;
             case this.TYPES.LSPR:
-            case this.TYPES.HSPR: return this.TYPES.SPR;
-            case this.TYPES.CTLT: return this.TYPES.ATLT;
-            case this.TYPES.CEVT: return this.TYPES.AEVT;
-            case this.TYPES.CACHV: return this.TYPES.ACHV;
-            default: return;
+            case this.TYPES.HSPR:
+                return this.TYPES.SPR;
+            case this.TYPES.CTLT:
+                return this.TYPES.ATLT;
+            case this.TYPES.CEVT:
+                return this.TYPES.AEVT;
+            case this.TYPES.CACHV:
+                return this.TYPES.ACHV;
+            default:
+                return;
         }
     }
 
     set(prop, value) {
-        switch(prop) {
+        switch (prop) {
             case this.TYPES.AGE:
             case this.TYPES.CHR:
             case this.TYPES.INT:
@@ -233,7 +245,8 @@ class Property {
             case this.TYPES.EXT:
                 this.lsset('extendTalent', value);
                 return
-            default: return;
+            default:
+                return;
         }
     }
 
@@ -249,12 +262,12 @@ class Property {
     }
 
     change(prop, value) {
-        if(Array.isArray(value)) {
-            for(const v of value)
+        if (Array.isArray(value)) {
+            for (const v of value)
                 this.change(prop, Number(v));
             return;
         }
-        switch(prop) {
+        switch (prop) {
             case this.TYPES.AGE:
             case this.TYPES.CHR:
             case this.TYPES.INT:
@@ -267,11 +280,11 @@ class Property {
             case this.TYPES.TLT:
             case this.TYPES.EVT:
                 const v = this.#data[prop];
-                if(value<0) {
+                if (value < 0) {
                     const index = v.indexOf(value);
-                    if(index!=-1) v.splice(index,1);
+                    if (index != -1) v.splice(index, 1);
                 }
-                if(!v.includes(value)) v.push(value);
+                if (!v.includes(value)) v.push(value);
                 this.achieve(prop, value);
                 return;
             case this.TYPES.TMS:
@@ -280,19 +293,22 @@ class Property {
                     this.get(prop) + parseInt(value)
                 );
                 return;
-            default: return;
+            default:
+                return;
         }
     }
 
     hookSpecial(prop) {
-        switch(prop) {
-            case this.TYPES.RDM: return listRandom(this.SPECIAL.RDM);
-            default: return prop;
+        switch (prop) {
+            case this.TYPES.RDM:
+                return listRandom(this.SPECIAL.RDM);
+            default:
+                return prop;
         }
     }
 
     effect(effects) {
-        for(let prop in effects)
+        for (let prop in effects)
             this.change(
                 this.hookSpecial(prop),
                 Number(effects[prop])
@@ -304,9 +320,48 @@ class Property {
     }
 
     ageNext() {
-        this.change(this.TYPES.AGE, 1);
-        const age = this.get(this.TYPES.AGE);
-        const {event, talent} = this.getAgeData(age);
+        let age = this.get(this.TYPES.AGE);
+        console.debug(age);
+
+        let tmp = String(age);
+        let ageObj;
+        tmp = tmp.split(".");
+        if (age <= 0) {
+            this.change(this.TYPES.AGE, 1);
+            ageObj = this.get(this.TYPES.AGE);
+            age =ageObj + 0.01;
+            this.set(this.TYPES.AGE, age);
+        } else {
+            this.set(this.TYPES.AGE, tmp[0]);
+            ageObj = this.get(this.TYPES.AGE);
+            tmp[0] = parseInt(tmp[0]);
+            tmp[1] = parseInt(tmp[1]);
+            switch (tmp[1]) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                    tmp[1] = tmp[1] + 1;
+                    tmp[1] = String(tmp[1])
+                    if(tmp[1].length === 1) {
+                        tmp[1] = "0" + tmp[1];
+                    }
+                    age = tmp[0] + "." + tmp[1]
+                    break;
+                case 12:
+                    age = (tmp[0] + 1) + ".01";
+                    break;
+            }
+            this.set(this.TYPES.AGE, age);
+        }
+        const {event, talent} = this.getAgeData(ageObj);
         return {age, event, talent};
     }
 
@@ -316,14 +371,27 @@ class Property {
 
     hl(prop, value) {
         let keys;
-        switch(prop) {
-            case this.TYPES.AGE: keys = [this.TYPES.LAGE, this.TYPES.HAGE]; break;
-            case this.TYPES.CHR: keys = [this.TYPES.LCHR, this.TYPES.HCHR]; break;
-            case this.TYPES.INT: keys = [this.TYPES.LINT, this.TYPES.HINT]; break;
-            case this.TYPES.STR: keys = [this.TYPES.LSTR, this.TYPES.HSTR]; break;
-            case this.TYPES.MNY: keys = [this.TYPES.LMNY, this.TYPES.HMNY]; break;
-            case this.TYPES.SPR: keys = [this.TYPES.LSPR, this.TYPES.HSPR]; break;
-            default: return;
+        switch (prop) {
+            case this.TYPES.AGE:
+                keys = [this.TYPES.LAGE, this.TYPES.HAGE];
+                break;
+            case this.TYPES.CHR:
+                keys = [this.TYPES.LCHR, this.TYPES.HCHR];
+                break;
+            case this.TYPES.INT:
+                keys = [this.TYPES.LINT, this.TYPES.HINT];
+                break;
+            case this.TYPES.STR:
+                keys = [this.TYPES.LSTR, this.TYPES.HSTR];
+                break;
+            case this.TYPES.MNY:
+                keys = [this.TYPES.LMNY, this.TYPES.HMNY];
+                break;
+            case this.TYPES.SPR:
+                keys = [this.TYPES.LSPR, this.TYPES.HSPR];
+                break;
+            default:
+                return;
         }
         const [l, h] = keys;
         this.#data[l] = min(this.#data[l], value);
@@ -332,7 +400,7 @@ class Property {
 
     achieve(prop, newData) {
         let key;
-        switch(prop) {
+        switch (prop) {
             case this.TYPES.ACHV:
                 const lastData = this.lsget(prop);
                 this.lsset(
@@ -340,9 +408,14 @@ class Property {
                     (lastData || []).concat([[newData, Date.now()]])
                 );
                 return;
-            case this.TYPES.TLT: key = this.TYPES.ATLT; break;
-            case this.TYPES.EVT: key = this.TYPES.AEVT; break;
-            default: return;
+            case this.TYPES.TLT:
+                key = this.TYPES.ATLT;
+                break;
+            case this.TYPES.EVT:
+                key = this.TYPES.AEVT;
+                break;
+            default:
+                return;
         }
         const lastData = this.lsget(key) || [];
         this.lsset(
@@ -350,7 +423,7 @@ class Property {
             Array.from(
                 new Set(
                     lastData
-                        .concat(newData||[])
+                        .concat(newData || [])
                         .flat()
                 )
             )
@@ -359,7 +432,7 @@ class Property {
 
     lsget(key) {
         const data = localStorage.getItem(key);
-        if(data === null) return;
+        if (data === null) return;
         return JSON.parse(data);
     }
 

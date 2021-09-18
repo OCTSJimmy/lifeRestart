@@ -468,7 +468,9 @@ class App {
         const trajectory = this.#life.next();
         const { age, content, isEnd } = trajectory;
         if(isEnd) this.#isEnd = true;
-        return `${age}岁：\t${
+        let tmp = String(age);
+        tmp = tmp.split(".");
+        return `${tmp[0]}岁${tmp[1]}月：\t${
             content.map(
                 ({type, description, grade, name, postEvent}) => {
                     switch(type) {

@@ -514,7 +514,7 @@ ul#total li .achievementtitle,
 
 .judge>li>span:nth-child(1),
 .lifeTrajectory>li>span:nth-child(1) {
-  width: 5rem;
+  width: 6rem;
   text-align: right;
 }
 .judge>li>span:nth-child(2),
