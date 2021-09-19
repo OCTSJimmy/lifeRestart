@@ -93,7 +93,7 @@ class Talent {
             else talentList[grade].push({ grade, name, description, id });
         }
 
-        return new Array(10)
+        return new Array(60)
             .fill(1).map((v, i)=>{
                 if(!i && include) return include;
                 let grade = randomGrade();
@@ -102,6 +102,11 @@ class Talent {
 
                 const random = Math.floor(Math.random()*length) % length;
                 return talentList[grade].splice(random,1)[0];
+            }).sort((a,b)=>{
+                let number = b.grade - a.grade;
+                if(number !== 0) return number;
+                number = a.id - b.id;
+                return number
             });
     }
 

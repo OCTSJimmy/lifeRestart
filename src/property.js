@@ -273,9 +273,15 @@ class Property {
             case this.TYPES.INT:
             case this.TYPES.STR:
             case this.TYPES.MNY:
-            case this.TYPES.SPR:
             case this.TYPES.LIF:
                 this.hl(prop, this.#data[prop] += Number(value));
+                return;
+            case this.TYPES.SPR:
+                if(value < 0) {
+                    this.hl(prop, this.#data[prop] += Number(value/10));
+                } else {
+                    this.hl(prop, this.#data[prop] += Number(value/5));
+                }
                 return;
             case this.TYPES.TLT:
             case this.TYPES.EVT:
@@ -321,19 +327,24 @@ class Property {
 
     ageNext() {
         let age = this.get(this.TYPES.AGE);
-        console.debug(age);
-
+        let ageInt = parseInt(age);
         let tmp = String(age);
-        let ageObj;
         tmp = tmp.split(".");
-        if (age <= 0) {
+        if (age <= 0.01) {
             this.change(this.TYPES.AGE, 1);
-            ageObj = this.get(this.TYPES.AGE);
-            age =ageObj + 0.01;
+            age = this.get(this.TYPES.AGE);
+            tmp = String(age).split(".");
+            age = parseFloat(tmp[0] + ".01");
+            ageInt = parseInt(tmp[0]);
             this.set(this.TYPES.AGE, age);
         } else {
             this.set(this.TYPES.AGE, tmp[0]);
-            ageObj = this.get(this.TYPES.AGE);
+            age = this.get(this.TYPES.AGE);
+            if(tmp[1] === undefined) {
+                tmp[1] = "01"
+            } else if(tmp[1].length<2) {
+                tmp[1] = tmp[1] + "0"
+            }
             tmp[0] = parseInt(tmp[0]);
             tmp[1] = parseInt(tmp[1]);
             switch (tmp[1]) {
@@ -359,9 +370,10 @@ class Property {
                     age = (tmp[0] + 1) + ".01";
                     break;
             }
-            this.set(this.TYPES.AGE, age);
+            this.set(this.TYPES.AGE, parseFloat(age));
+            ageInt = tmp[0];
         }
-        const {event, talent} = this.getAgeData(ageObj);
+        const {event, talent} = this.getAgeData(ageInt);
         return {age, event, talent};
     }
 
