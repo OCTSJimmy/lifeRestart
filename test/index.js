@@ -54,9 +54,19 @@ async function debug() {
         const { age, content } = trajectory;
         let tmp = String(age);
         tmp = tmp.split(".");
+        tmp[1] = parseInt(tmp[1]);
+        let season = "春"
+        switch (tmp[1]){
+            case 1:season = "春"; break;
+            case 2:season = "夏"; break;
+            case 3:season = "秋"; break;
+            case 4:season = "冬"; break;
+            default:
+                season = "春";
+        }
         console.debug(
             `---------------------------------`,
-            `\n-- ${tmp[0]} 岁${tmp[1]} 月\n   `,
+            `\n-- ${tmp[0]} 岁${season} \n   `,
             content.map(
                 ({type, description, rate, name, postEvent}) => {
                     switch(type) {

@@ -12,11 +12,20 @@ class App {
     #currentPage;
     #talentSelected = new Set();
     #totalMax = 20;
+    #talentMax = 3;
+    #talentRandomMax = 10;
     #isEnd = false;
     #selectedExtendTalent = null;
     #hintTimeout;
     #specialthanks;
     #autoTrajectory;
+    #defaultTalents = {
+        "30": [1022, 1071],
+        "50": [1048, 1044],
+        "70": [1023, 1017],
+        "100": [1141, 1043],
+        "120": [1016, 1064, 1072]
+    };
 
     async initial() {
         this.initPages();
@@ -190,12 +199,13 @@ class App {
             .find('#rank')
             .click(() => this.hint('别卷了，没有排行榜'));
         // Talent
+
         const talentPage = $(`
         <div id="main">
             <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
-            <button id="random" class="mainbtn" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"">10连抽！</button>
+            <button id="random" class="mainbtn" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"">${this.#talentRandomMax}连抽！</button>
             <ul id="talents" class="selectlist"></ul>
-            <button id="next" class="mainbtn">请选择3个</button>
+            <button id="next" class="mainbtn">请选择${this.#talentMax}个</button>
         </div>
         `);
 
@@ -208,7 +218,7 @@ class App {
             .click(() => {
                 talentPage.find('#random').hide();
                 const ul = talentPage.find('#talents');
-                this.#life.talentRandom()
+                this.#life.talentRandom(this.#talentRandomMax)
                     .forEach(talent => {
                         const li = createTalent(talent);
                         ul.append(li);
@@ -216,12 +226,12 @@ class App {
                             if (li.hasClass('selected')) {
                                 li.removeClass('selected')
                                 this.#talentSelected.delete(talent);
-                                if (this.#talentSelected.size < 3) {
-                                    talentPage.find('#next').text('请选择7个')
+                                if (this.#talentSelected.size < this.#talentMax) {
+                                    talentPage.find('#next').text(`请选择${this.#talentMax}个天赋`)
                                 }
                             } else {
-                                if (this.#talentSelected.size == 7) {
-                                    this.hint('只能选7个天赋');
+                                if (this.#talentSelected.size == this.#talentMax) {
+                                    this.hint(`只能选${this.#talentMax}个天赋`);
                                     return;
                                 }
 
@@ -240,8 +250,10 @@ class App {
                                 }
                                 li.addClass('selected');
                                 this.#talentSelected.add(talent);
-                                if (this.#talentSelected.size == 7) {
+                                if (this.#talentSelected.size == this.#talentMax) {
                                     talentPage.find('#next').text('开始新人生')
+                                } else {
+                                    talentPage.find('#next').text(`请选择${this.#talentMax}个天赋`)
                                 }
                             }
                         });
@@ -252,11 +264,56 @@ class App {
         talentPage
             .find('#next')
             .click(() => {
-                if (this.#talentSelected.size != 7) {
-                    this.hint('请选择7个天赋');
+                if (this.#talentSelected.size != this.#talentMax) {
+                    this.hint(`请选择${this.#talentMax}个天赋`);
                     return;
                 }
                 talentPage.find('#next').hide()
+                const selected = this.#talentSelected;
+                if (this.#defaultTalents) {
+                    const propertyType = this.#life.getPropertyType();
+                    const cachvType = propertyType.CACHV
+                    const cachv = this.#life.getProperty(cachvType);
+                    const talent = [];
+                    const talentsId = this.#defaultTalents;
+                    for (let key in talentsId) {
+                        let isPass = false;
+                        if (cachv < parseInt(key)) {
+                            isPass = true;
+                            continue;
+                        }
+                        for (let value of talentsId[key]) {
+                            isPass = false;
+                            for (let t of selected.values()) {
+                                if (t.id === value) {
+                                    isPass = true;
+                                    break;
+                                }
+                            }
+                            if (isPass) {
+                                continue;
+                            }
+                            talent.push(this.#life.getTalent(value));
+                        }
+                    }
+                    if (talent) {
+                        talent.forEach(t => {
+                            this.#talentSelected.add(t);
+                        })
+
+                        const sorted = Array.from(this.#talentSelected).sort((a, b) => {
+                            let result = b.grade - a.grade;
+                            if (result === 0) {
+                                result = a.id - b.id;
+                            }
+                            return result;
+                        })
+                        this.#talentSelected.clear();
+                        sorted.forEach(v => {
+                            this.#talentSelected.add(v);
+                        })
+                    }
+                }
                 this.#totalMax = 20 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({id}) => id));
                 this.switch('property');
             })
@@ -282,7 +339,7 @@ class App {
                 .find('#talentSelectedView').append(
                 `<li>已选天赋</li>` +
                 Array.from(this.#talentSelected)
-                    .map(({name, description}) => `<li class="grade0b">${name}(${description})</li>`)
+                    .map(({name, grade, description}) => `<li class="grade${grade}b">${name}(${description})</li>`)
                     .join('')
             )
         }
@@ -424,7 +481,25 @@ class App {
                 const {age, content, isEnd} = trajectory;
                 let tmp = String(age);
                 tmp = tmp.split(".");
-                const li = $(`<li><span>${tmp[0]}岁${tmp[1]}月：</span><span>${
+                tmp[1] = parseInt(tmp[1]);
+                let season = "春"
+                switch (tmp[1]) {
+                    case 1:
+                        season = "春";
+                        break;
+                    case 2:
+                        season = "夏";
+                        break;
+                    case 3:
+                        season = "秋";
+                        break;
+                    case 4:
+                        season = "冬";
+                        break;
+                    default:
+                        season = "春";
+                }
+                const li = $(`<li><span>${tmp[0]}岁${season}：</span><span>${
                     content.map(
                         ({type, description, grade, name, postEvent}) => {
                             switch (type) {
@@ -451,7 +526,7 @@ class App {
                 const sprPointIndex = sprStr.indexOf(".");
                 let spr = property.SPR;
                 if (sprPointIndex >= 0) {
-                   spr = sprStr.substr(0, sprPointIndex + 2);
+                    spr = sprStr.substr(0, sprPointIndex + 2);
                 }
                 $("#lifeProperty").html(`
                 <li><span>颜值</span><span>${property.CHR}</span></li>
@@ -533,7 +608,7 @@ class App {
                 <li class="grade0"><span>快乐：</span><span></span>3级 不太幸福的人生</li>
             </ul>
             <div class="head" style="height:auto;">天赋，你可以选一个，下辈子还能抽到</div>
-            <ul id="talents" class="selectlist" style="flex: 0 1 auto;">
+            <ul id="talents" class="selectlist" style="flex: 1;">
                 <li class="grade2b">黑幕（面试一定成功）</li>
             </ul>
             <button id="again" class="mainbtn"><span class="iconfont">&#xe6a7;</span>再次重开</button>

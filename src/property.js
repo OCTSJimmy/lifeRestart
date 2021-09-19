@@ -278,9 +278,9 @@ class Property {
                 return;
             case this.TYPES.SPR:
                 if(value < 0) {
-                    this.hl(prop, this.#data[prop] += Number(value/10));
+                    this.hl(prop, this.#data[prop] += Number(value/2));
                 } else {
-                    this.hl(prop, this.#data[prop] += Number(value/5));
+                    this.hl(prop, this.#data[prop] += Number(value));
                 }
                 return;
             case this.TYPES.TLT:
@@ -351,14 +351,6 @@ class Property {
                 case 1:
                 case 2:
                 case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 10:
-                case 11:
                     tmp[1] = tmp[1] + 1;
                     tmp[1] = String(tmp[1])
                     if(tmp[1].length === 1) {
@@ -366,7 +358,7 @@ class Property {
                     }
                     age = tmp[0] + "." + tmp[1]
                     break;
-                case 12:
+                case 4:
                     age = (tmp[0] + 1) + ".01";
                     break;
             }

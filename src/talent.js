@@ -47,10 +47,10 @@ class Talent {
         return { grade, name, description };
     }
 
-    exclusive(talends, exclusiveId) {
+    exclusive(talents, exclusiveId) {
         const { exclusive } = this.get(exclusiveId);
         if(!exclusive) return null;
-        for(const talent of talends) {
+        for(const talent of talents) {
             for(const e of exclusive) {
                 if(talent == e) return talent;
             }
@@ -58,7 +58,7 @@ class Talent {
         return null;
     }
 
-    talentRandom(include, {times = 0, achievement = 0} = {}) {
+    talentRandom(include, {times = 0, achievement = 0} = {}, talentRandomMax = 10) {
         const rate = { 1:100, 2:10, 3:1, };
         const rateAddition = { 1:1, 2:1, 3:1, };
         const timesRate = getRate('times', times);
@@ -84,24 +84,39 @@ class Talent {
         // 1000, 100, 10, 1
         const talentList = {};
         for(const talentId in this.#talents) {
-            const { id, grade, name, description } = this.#talents[talentId];
+            const { id, grade, name, description, exclusive } = this.#talents[talentId];
             if(id == include) {
-                include = { grade, name, description, id };
+                include = { grade, name, description, id, exclusive };
                 continue;
             }
-            if(!talentList[grade]) talentList[grade] = [{ grade, name, description, id }];
-            else talentList[grade].push({ grade, name, description, id });
+            if(!talentList[grade]) talentList[grade] = [{ grade, name, description, id, exclusive }];
+            else talentList[grade].push({ grade, name, description, id, exclusive });
         }
+        let randomTalent = [];
 
-        return new Array(60)
-            .fill(1).map((v, i)=>{
-                if(!i && include) return include;
+        return new Array(talentRandomMax)
+            .fill(1).map((v, i,array)=>{
+                if(!i && include){
+                    randomTalent.push(clone(include));
+                    return include;
+                }
                 let grade = randomGrade();
                 while(talentList[grade].length == 0) grade--;
-                const length = talentList[grade].length;
-
-                const random = Math.floor(Math.random()*length) % length;
-                return talentList[grade].splice(random,1)[0];
+                let rndAgain = false;
+                let spliceElement;
+                do {
+                    rndAgain = false;
+                    const length = talentList[grade].length;
+                    let random = Math.floor(Math.random() * length) % length;
+                    let element = talentList[grade][random];
+                    if (this.exclusive(randomTalent.map(({id})=>id), element.id) != null) {
+                        rndAgain = true;
+                    } else {
+                        spliceElement = talentList[grade].splice(random, 1)[0];
+                        randomTalent.push(clone(spliceElement));
+                    }
+                } while (rndAgain)
+                return spliceElement;
             }).sort((a,b)=>{
                 let number = b.grade - a.grade;
                 if(number !== 0) return number;

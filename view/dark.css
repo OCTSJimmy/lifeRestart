@@ -94,10 +94,6 @@ body {
   display: none;
 }
 
-#talentSelectedView {
-  flex: 0 1 auto;
-}
-
 .mainbtn {
   margin: 0.5rem 1rem 1rem;
   padding: 0.5rem 1.5rem;
@@ -307,13 +303,25 @@ ul#total li .achievementtitle,
   color: #EEEEEE;
 }
 
-.propinitial,
+.propinitial {
+  list-style: none;
+  flex: 0 auto;
+  padding: 1rem;
+  overflow: auto;
+}
 .selectlist {
   list-style: none;
   flex: 1;
   padding: 1rem;
   overflow: auto;
 }
+
+/*
+#talentSelectedView {
+  flex: 0 1 auto;
+}
+*/
+
 
 .lifeProperty {
   list-style: none;
@@ -547,7 +555,7 @@ ul#total li .achievementtitle,
 
 .judge {
   list-style: none;
-  flex: 1;
+  flex: 2;
   margin: 1rem;
   display: flex;
   flex-direction: column;

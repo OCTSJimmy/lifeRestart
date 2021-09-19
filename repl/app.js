@@ -308,7 +308,7 @@ class App {
         return this.next(true);
     }
 
-    remake() {
+    remake(talentRandomMax = 10) {
         if(this.#talentExtend) {
             this.#life.talentExtend(this.#talentExtend)
             dumpLocalStorage();
@@ -319,7 +319,7 @@ class App {
         this.#talentSelected.clear();
         this.#propertyAllocation = {CHR:0,INT:0,STR:0,MNY:0,SPR:5};
         this.#step = this.Steps.TALENT;
-        this.#randomTalents = this.#life.talentRandom();
+        this.#randomTalents = this.#life.talentRandom(talentRandomMax);
         return this.list();
     }
 
@@ -412,7 +412,7 @@ class App {
             .join('\n');
     }
 
-    next(enter) {
+    next(enter, talentRandomMax = 10) {
         const warn = (a, b) => `${a}\n${this.style('warn', this.style('warn', b))}`;
         switch(this.#step) {
             case this.Steps.TALENT:
@@ -439,7 +439,7 @@ class App {
                     this.list()
                 }`;
             case this.Steps.SUMMARY:
-                return this.remake();
+                return this.remake(talentRandomMax);
         }
     }
 
@@ -470,7 +470,17 @@ class App {
         if(isEnd) this.#isEnd = true;
         let tmp = String(age);
         tmp = tmp.split(".");
-        return `${tmp[0]}岁${tmp[1]}月：\t${
+        tmp[1] = parseInt(tmp[1]);
+        let season = "春"
+        switch (tmp[1]){
+            case 1:season = "春"; break;
+            case 2:season = "夏"; break;
+            case 3:season = "秋"; break;
+            case 4:season = "冬"; break;
+            default:
+                season = "春";
+        }
+        return `${tmp[0]}岁${season}：\t${
             content.map(
                 ({type, description, grade, name, postEvent}) => {
                     switch(type) {
