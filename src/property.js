@@ -330,7 +330,8 @@ class Property {
         let ageInt = parseInt(age);
         let tmp = String(age);
         tmp = tmp.split(".");
-        if (age <= 1.01 || (ageInt === 100)) {
+        let check = tmp[1] ? parseInt(tmp[1]) : 0;
+        if (age <= 1.01 || (ageInt === 100 && check >0)) {
             this.change(this.TYPES.AGE, 1);
             age = this.get(this.TYPES.AGE);
             tmp = String(age).split(".");
@@ -359,7 +360,8 @@ class Property {
                     age = tmp[0] + "." + tmp[1]
                     break;
                 case 4:
-                    age = (tmp[0] + 1) + ".01";
+                    tmp[0] = tmp[0] + 1;
+                    age = (tmp[0]) + ".01";
                     break;
             }
             this.set(this.TYPES.AGE, parseFloat(age));
