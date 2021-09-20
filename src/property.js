@@ -330,7 +330,7 @@ class Property {
         let ageInt = parseInt(age);
         let tmp = String(age);
         tmp = tmp.split(".");
-        if (age <= 0.01) {
+        if (age <= 1.01 || (ageInt === 100)) {
             this.change(this.TYPES.AGE, 1);
             age = this.get(this.TYPES.AGE);
             tmp = String(age).split(".");
@@ -367,6 +367,17 @@ class Property {
         }
         const {event, talent} = this.getAgeData(ageInt);
         return {age, event, talent};
+    }
+
+    ageTo(age){
+        age = parseFloat(age);
+        if(age) {
+            this.set(this.TYPES.AGE, age);
+        }
+        let ageOrigin = this.get(this.TYPES.AGE);
+        let ageInt = parseInt(ageOrigin);
+        const {event, talent} = this.getAgeData(ageInt);
+        return {ageInt, event, talent};
     }
 
     getAgeData(age) {

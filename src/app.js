@@ -20,7 +20,7 @@ class App {
     #specialthanks;
     #autoTrajectory;
     #defaultTalents = {
-        "30": [1022, 1071],
+        "30": [1022, 1071, 1040],
         "50": [1048, 1044],
         "70": [1023, 1017],
         "100": [1141, 1043],
@@ -71,6 +71,7 @@ class App {
             <button id="load">Load</button>
             <div id="title">
                 人生重开模拟器<br>
+                <div style="font-size:1.5rem; font-weight: normal;text-align: end;">之 春·夏·秋·冬</div>
                 <div style="font-size:1.5rem; font-weight:normal;">这垃圾人生一秒也不想呆了</div>
             </div>
             <button id="restart" class="mainbtn"><span class="iconfont">&#xe6a7;</span>立即重开</button>
