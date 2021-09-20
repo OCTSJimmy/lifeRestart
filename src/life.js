@@ -217,14 +217,33 @@ class Life {
             this.#achievement.Opportunity.SUMMARY,
             this.#property
         )
+
+        let HAGE = this.#property.get(this.#property.TYPES.HAGE);
+        let HCHR = this.#property.get(this.#property.TYPES.HCHR);
+        let HINT = this.#property.get(this.#property.TYPES.HINT);
+        let HSTR = this.#property.get(this.#property.TYPES.HSTR);
+        let HMNY = this.#property.get(this.#property.TYPES.HMNY);
+        let HSPR = this.#property.get(this.#property.TYPES.HSPR);
+        let TLT = this.#property.get(this.#property.TYPES.TLT);
+        let SUM = this.#property.get(this.#property.TYPES.SUM);
+        let CACHV = this.#property.get(this.#property.TYPES.CACHV);
+        HAGE = HAGE ?　parseInt(HAGE):0;
+        HCHR = HCHR ? HCHR.toFixed(2):0;
+        HINT = HINT ? HINT.toFixed(2):0;
+        HSTR = HSTR ? HSTR.toFixed(2):0;
+        HMNY = HMNY ? HMNY.toFixed(2):0;
+        HSPR = HSPR ? HSPR.toFixed(2):0;
+        SUM = SUM ? SUM : 0;
         return {
-            AGE: parseInt(this.#property.get(this.#property.TYPES.HAGE)),
-            CHR: this.#property.get(this.#property.TYPES.HCHR).toFixed(2),
-            INT: this.#property.get(this.#property.TYPES.HINT).toFixed(2),
-            STR: this.#property.get(this.#property.TYPES.HSTR).toFixed(2),
-            MNY: this.#property.get(this.#property.TYPES.HMNY).toFixed(2),
-            SPR: this.#property.get(this.#property.TYPES.HSPR).toFixed(2),
-            SUM: this.#property.get(this.#property.TYPES.SUM).toFixed(2),
+            AGE: HAGE,
+            CHR: HCHR,
+            INT: HINT,
+            STR: HSTR,
+            MNY: HMNY,
+            SPR: HSPR,
+            SUM: SUM,
+            TLT: TLT,
+            CACHV: CACHV
         };
     }
 

@@ -75,6 +75,16 @@ const data = {
         {"min":100, "judge": "罕见", "grade": 2},
         {"min":110, "judge": "逆天", "grade": 3},
         {"min":120, "judge": "传说", "grade": 3},
+    ],
+    "CACHV": [
+        {"judge": "地狱", "grade": 0},
+        {"min":9, "judge": "折磨", "grade": 0},
+        {"min":19, "judge": "不佳", "grade": 0},
+        {"min":29, "judge": "普通", "grade": 0},
+        {"min":49, "judge": "优秀", "grade": 1},
+        {"min":69, "judge": "罕见", "grade": 2},
+        {"min":99, "judge": "逆天", "grade": 3},
+        {"min":119, "judge": "传说", "grade": 3},
     ]
 }
 

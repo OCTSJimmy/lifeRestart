@@ -251,13 +251,33 @@ class Property {
     }
 
     getLastRecord() {
+        let AGE = this.get(this.TYPES.AGE);
+        let CHR = this.get(this.TYPES.CHR);
+        let INT = this.get(this.TYPES.INT);
+        let STR = this.get(this.TYPES.STR);
+        let MNY = this.get(this.TYPES.MNY);
+        let SPR = this.get(this.TYPES.SPR);
+        let TLT = this.get(this.TYPES.TLT);
+        let SUM = this.get(this.TYPES.SUM);
+        let CACHV = this.get(this.TYPES.CACHV);
+        AGE = AGE ?　parseInt(AGE):0;
+        CHR = CHR ? CHR.toFixed(2):0;
+        INT = INT ? INT.toFixed(2):0;
+        STR = STR ? STR.toFixed(2):0;
+        MNY = MNY ? MNY.toFixed(2):0;
+        SPR = SPR ? SPR.toFixed(2):0;
+        SUM = SUM ? SUM : 0;
+        CACHV = CACHV ? CACHV : 0;
         return clone({
-            [this.TYPES.AGE]: this.get(this.TYPES.AGE).toFixed(2),
-            [this.TYPES.CHR]: this.get(this.TYPES.CHR).toFixed(2),
-            [this.TYPES.INT]: this.get(this.TYPES.INT).toFixed(2),
-            [this.TYPES.STR]: this.get(this.TYPES.STR).toFixed(2),
-            [this.TYPES.MNY]: this.get(this.TYPES.MNY).toFixed(2),
-            [this.TYPES.SPR]: this.get(this.TYPES.SPR).toFixed(2),
+            [this.TYPES.AGE]: AGE,
+            [this.TYPES.CHR]: CHR,
+            [this.TYPES.INT]: INT,
+            [this.TYPES.STR]: STR,
+            [this.TYPES.MNY]: MNY,
+            [this.TYPES.SPR]: SPR,
+            [this.TYPES.TLT]: TLT,
+            [this.TYPES.SUM]: SUM,
+            [this.TYPES.CACHV]: CACHV,
         });
     }
 

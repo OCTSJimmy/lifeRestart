@@ -46,6 +46,7 @@ class App {
     #exit;
     #interval;
     #style = {
+        white: ['\x1B[97m', '\x1B[39m'], // White
         warn: ['\x1B[93m', '\x1B[39m'], // Bright Yellow
         grade1: ['\x1B[94m', '\x1B[39m'], // Bright Blue
         grade2: ['\x1B[95m', '\x1B[39m'], // Bright Magenta
@@ -494,7 +495,7 @@ class App {
             (talent, i) =>
                 this.style(
                     `grade${talent.grade}b`,
-                    `${check(talent) ? '√' : ' '} ${i} ${talent.name}（${talent.description}）`
+                    this.style(talent.grade > 0 ? `white` : "grade0", `${check(talent) ? '√' : ' '} ${i} ${talent.name}（${talent.description}）`)
                 )
         )]
             .flat()
@@ -610,29 +611,34 @@ class App {
             INT: snapshotINT,
             STR: snapshotSTR,
             MNY: snapshotMNY,
+            SPR: snapshotSPR,
             AGE: snapshotAGE,
             TLT: snapshotTLT
         } = this.#life.getLastRecord();
         const trajectory = this.#life.next();
 
         const {age, content, isEnd} = trajectory;
-        const {CHR, INT, STR, MNY, AGE, TLT} = this.#life.getLastRecord();
+        const {CHR, INT, STR, MNY, SPR, AGE, TLT} = this.#life.getLastRecord();
 
         let diff = "";
         if (snapshotCHR !== CHR) {
-            diff += `\n\t      颜值(CHR) ${snapshotCHR} → ${CHR}`
+            diff += this.style('warn',`\n\t\t 颜值(CHR) ${snapshotCHR} → ${CHR}`);
         }
 
         if (snapshotINT !== INT) {
-            diff += `\n\t      智力(INT) ${snapshotINT} → ${INT}`
+            diff += this.style('warn',`\n\t\t 智力(INT) ${snapshotINT} → ${INT}`);
         }
 
         if (snapshotSTR !== STR) {
-            diff += `\n\t      体质(STR) ${snapshotSTR} → ${STR}`
+            diff += this.style('warn',`\n\t\t 体质(STR) ${snapshotSTR} → ${STR}`);
         }
 
         if (snapshotMNY !== MNY) {
-            diff += `\n\t      家境(MNY) ${snapshotMNY} → ${MNY}`
+            diff += this.style('warn',`\n\t\t 家境(MNY) ${snapshotMNY} → ${MNY}`);
+        }
+
+        if (snapshotSPR !== SPR) {
+            diff += this.style('warn',`\n\t\t 快乐(SPR) ${snapshotSPR} → ${SPR}`);
         }
 
         if (isEnd) this.#isEnd = true;
@@ -663,10 +669,10 @@ class App {
                         case 'TLT':
                             return `天赋【${name}】发动：${description}`;
                         case 'EVT':
-                            return description + (postEvent ? `\n\t${postEvent}` : '');
+                            return description + (postEvent ? `\n\t \t${postEvent}` : '');
                     }
                 }
-            ).join(`\n\t`)
+            ).join(`\n\t\t`)
         }`;
         if (diff.length > 0) {
             result += diff
@@ -675,16 +681,38 @@ class App {
     }
 
     state() {
-        const {CHR, INT, STR, MNY, AGE, TLT} = this.#life.getLastRecord();
-        return `
-属性(TAG)       当前值
-年龄(AGE)         ${AGE}
-颜值(CHR)         ${CHR}
-智力(INT)         ${INT}
-体质(STR)         ${STR}
-家境(MNY)         ${MNY}
-天赋(TLT)         ${TLT}
-        `
+        const lastRecord = this.#life.getLastRecord();
+        const {TLT, CACHV} = lastRecord;
+        const format = (name, type) => {
+            const value = lastRecord[type];
+            const {judge, grade} = summary(type, value);
+            return this.style(`grade${grade}b`,
+                this.style(grade > 0 ? `white` : "grade0", `${name}：${value} ${judge}`)
+            );
+        }
+
+        let str = [
+            '🎉 当前状态：',
+            format('颜值', 'CHR'),
+            format('智力', 'INT'),
+            format('体质', 'STR'),
+            format('家境', 'MNY'),
+            format('快乐', 'SPR'),
+            format('享年', 'AGE'),
+            format('总评', 'SUM'),
+            format('成就', 'CACHV')
+        ].join('\n');
+
+        let talents = TLT ? TLT.map(v => this.#life.getTalent(v)) : [];
+        let TLT_STR = `天赋：\t${talents.map(
+            (talent, i) =>
+                this.style(
+                    `grade${talent.grade}b`,
+                    this.style(talent.grade > 0 ? `white` : "grade0", `${i} ${talent.name}（${talent.description}）`)
+                )
+        ).join('\n\t')}`;
+
+        return [str, TLT_STR].join('\n');
     }
 
 
@@ -790,7 +818,9 @@ class App {
         const format = (name, type) => {
             const value = summaryData[type];
             const {judge, grade} = summary(type, value);
-            return this.style(`grade${grade}b`, `${name}：${value} ${judge}`);
+            return this.style(`grade${grade}b`,
+                this.style(grade > 0 ? `white` : "grade0", `${name}：${value} ${judge}`)
+            );
         }
 
         return [
