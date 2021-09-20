@@ -252,12 +252,12 @@ class Property {
 
     getLastRecord() {
         return clone({
-            [this.TYPES.AGE]: this.get(this.TYPES.AGE),
-            [this.TYPES.CHR]: this.get(this.TYPES.CHR),
-            [this.TYPES.INT]: this.get(this.TYPES.INT),
-            [this.TYPES.STR]: this.get(this.TYPES.STR),
-            [this.TYPES.MNY]: this.get(this.TYPES.MNY),
-            [this.TYPES.SPR]: this.get(this.TYPES.SPR),
+            [this.TYPES.AGE]: this.get(this.TYPES.AGE).toFixed(2),
+            [this.TYPES.CHR]: this.get(this.TYPES.CHR).toFixed(2),
+            [this.TYPES.INT]: this.get(this.TYPES.INT).toFixed(2),
+            [this.TYPES.STR]: this.get(this.TYPES.STR).toFixed(2),
+            [this.TYPES.MNY]: this.get(this.TYPES.MNY).toFixed(2),
+            [this.TYPES.SPR]: this.get(this.TYPES.SPR).toFixed(2),
         });
     }
 

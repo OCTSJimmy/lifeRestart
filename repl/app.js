@@ -605,41 +605,35 @@ class App {
                 return;
             }
         }
-        const type = this.#life.getPropertyType();
-        const snapshotCHR = this.#life.getProperty(type.CHR);
-        const snapshotINT = this.#life.getProperty(type.INT);
-        const snapshotSTR = this.#life.getProperty(type.STR);
-        const snapshotMNY = this.#life.getProperty(type.MNY);
-        const snapshotAGE = this.#life.getProperty(type.AGE);
-        const snapshotTLT = this.#life.getProperty(type.TLT);
-
+        const {
+            CHR: snapshotCHR,
+            INT: snapshotINT,
+            STR: snapshotSTR,
+            MNY: snapshotMNY,
+            AGE: snapshotAGE,
+            TLT: snapshotTLT
+        } = this.#life.getLastRecord();
         const trajectory = this.#life.next();
 
         const {age, content, isEnd} = trajectory;
+        const {CHR, INT, STR, MNY, AGE, TLT} = this.#life.getLastRecord();
 
-        const CHR = this.#life.getProperty(type.CHR);
-        const INT = this.#life.getProperty(type.INT);
-        const STR = this.#life.getProperty(type.STR);
-        const MNY = this.#life.getProperty(type.MNY);
-        const AGE = this.#life.getProperty(type.AGE);
-        const TLT = this.#life.getProperty(type.TLT);
         let diff = "";
-        if (snapshotCHR != CHR) {
+        if (snapshotCHR !== CHR) {
             diff += `\n\t      颜值(CHR) ${snapshotCHR} → ${CHR}`
         }
 
-        if (snapshotINT != INT) {
+        if (snapshotINT !== INT) {
             diff += `\n\t      智力(INT) ${snapshotINT} → ${INT}`
         }
 
-        if (snapshotSTR != STR) {
+        if (snapshotSTR !== STR) {
             diff += `\n\t      体质(STR) ${snapshotSTR} → ${STR}`
         }
 
-        if (snapshotMNY != MNY) {
+        if (snapshotMNY !== MNY) {
             diff += `\n\t      家境(MNY) ${snapshotMNY} → ${MNY}`
         }
-
 
         if (isEnd) this.#isEnd = true;
         let tmp = String(age);
@@ -674,20 +668,14 @@ class App {
                 }
             ).join(`\n\t`)
         }`;
-        if(diff.length > 0) {
-            result +=  diff
+        if (diff.length > 0) {
+            result += diff
         }
         return result;
     }
 
     state() {
-        const type = this.#life.getPropertyType();
-        const CHR = this.#life.getProperty(type.CHR);
-        const INT = this.#life.getProperty(type.INT);
-        const STR = this.#life.getProperty(type.STR);
-        const MNY = this.#life.getProperty(type.MNY);
-        const AGE = this.#life.getProperty(type.AGE);
-        const TLT = this.#life.getProperty(type.TLT);
+        const {CHR, INT, STR, MNY, AGE, TLT} = this.#life.getLastRecord();
         return `
 属性(TAG)       当前值
 年龄(AGE)         ${AGE}

@@ -522,19 +522,22 @@ class App {
                     trajectoryPage.find('#auto2x').hide();
                     // trajectoryPage.find('#domToImage').show();
                 }
-                const property = this.#life.getLastRecord();
-                const sprStr = String(property.SPR);
-                const sprPointIndex = sprStr.indexOf(".");
-                let spr = property.SPR;
-                if (sprPointIndex >= 0) {
-                    spr = sprStr.substr(0, sprPointIndex + 2);
-                }
+                let lastRecord = this.#life.getLastRecord();
+                Object.keys(lastRecord).map(key => {
+                    let value = lastRecord[key];
+                    const str = String(value);
+                    const index = str.indexOf(".");
+                    if (index >= 0) {
+                        value = str.substr(0, index + 2);
+                    }
+                    lastRecord[key] = value;
+                });
                 $("#lifeProperty").html(`
-                <li><span>颜值</span><span>${property.CHR}</span></li>
-                <li><span>智力</span><span>${property.INT}</span></li>
-                <li><span>体质</span><span>${property.STR}</span></li>
-                <li><span>家境</span><span>${property.MNY}</span></li>
-                <li><span>快乐</span><span>${spr}</span></li>
+                <li><span>颜值</span><span>${lastRecord.CHR}</span></li>
+                <li><span>智力</span><span>${lastRecord.INT}</span></li>
+                <li><span>体质</span><span>${lastRecord.STR}</span></li>
+                <li><span>家境</span><span>${lastRecord.MNY}</span></li>
+                <li><span>快乐</span><span>${lastRecord.SPR}</span></li>
                 `);
             });
         // html2canvas
