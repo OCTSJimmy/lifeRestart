@@ -1,5 +1,5 @@
-import { summary } from '../src/functions/summary.js'
-import { readFile } from 'fs/promises';
+import {summary} from '../src/functions/summary.js'
+import {readFile} from 'fs/promises';
 import Life from '../src/life.js';
 
 globalThis.json = async fileName => JSON.parse(await readFile(`data/${fileName}.json`));
@@ -7,11 +7,11 @@ globalThis.json = async fileName => JSON.parse(await readFile(`data/${fileName}.
 globalThis.$$eventMap = new Map();
 globalThis.$$event = (tag, data) => {
     const listener = $$eventMap.get(tag);
-    if(listener) listener.forEach(fn=>fn(data));
+    if (listener) listener.forEach(fn => fn(data));
 }
 globalThis.$$on = (tag, fn) => {
     let listener = $$eventMap.get(tag);
-    if(!listener) {
+    if (!listener) {
         listener = new Set();
         $$eventMap.set(tag, listener);
     }
@@ -19,7 +19,7 @@ globalThis.$$on = (tag, fn) => {
 }
 globalThis.$$off = (tag, fn) => {
     const listener = $$eventMap.get(tag);
-    if(listener) listener.delete(fn);
+    if (listener) listener.delete(fn);
 }
 
 class App {
@@ -27,7 +27,7 @@ class App {
         this.#life = new Life();
     }
 
-    Steps= {
+    Steps = {
         TALENT: 'talent',
         PROPERTY: 'property',
         TRAJECTORY: 'trajectory',
@@ -55,10 +55,19 @@ class App {
         grade3b: ['\x1B[103m', '\x1B[49m'], // Bright Yellow BG
     };
     #randomTalents;
+    #talentMax = 3;
+    #talentRandomMax = 10;
+    #defaultTalents = {
+        "30": [1022, 1071, 1040],
+        "50": [1048, 1044],
+        "70": [1023, 1017],
+        "100": [1141, 1043],
+        "120": [1016, 1064, 1072]
+    };
 
     style(type, str) {
         const style = this.#style[type];
-        if(!style) return str;
+        if (!style) return str;
         return `${style[0]}${str}${style[1]}`;
     }
 
@@ -72,7 +81,7 @@ class App {
 \n🎉键入 \x1B[4m/remake\x1B[24m 开始游戏`,
             true
         );
-        $$on('achievement', ({name})=>this.output(`
+        $$on('achievement', ({name}) => this.output(`
 -------------------------
     解锁成就【${name}】
 -------------------------
@@ -83,63 +92,71 @@ class App {
         this.#input = input;
         this.#output = output;
         this.#exit = exit;
-        input(command=>{
+        input(command => {
             const ret = this.repl(command);
-            if(!ret) return;
-            if(typeof ret == 'string') return this.output(ret, true);
-            if(Array.isArray(ret)) return this.output(...ret);
-            const { message, isRepl } = ret;
+            if (!ret) return;
+            if (typeof ret == 'string') return this.output(ret, true);
+            if (Array.isArray(ret)) return this.output(...ret);
+            const {message, isRepl} = ret;
             return this.output(message, isRepl);
         });
     }
 
     output(data, isRepl) {
-        if(!this.#output) return;
+        if (!this.#output) return;
         this.#output(data, isRepl);
     }
 
     exit(code) {
-        if(this.#exit) this.#exit(code);
+        if (this.#exit) this.#exit(code);
         process.exit(code);
     }
 
     repl(command) {
         command = command.split(/\s+/);
-        switch(command.shift()) {
+        switch (command.shift()) {
 
             case 'r':
             case 'remake':
-            case '/remake':return this.remake();
+            case '/remake':
+                return this.remake();
 
             case 's':
             case 'select':
-            case '/select': return this.select(...command);
+            case '/select':
+                return this.select(...command);
 
             case 'u':
             case 'unselect':
-            case '/unselect': return this.unselect(...command);
+            case '/unselect':
+                return this.unselect(...command);
 
             case 'n':
             case 'next':
-            case '/next': return this.next(true);
+            case '/next':
+                return this.next(true);
 
             case 'a':
             case 'alloc':
             case 'allocation':
             case '/alloc':
-            case '/allocation': return this.alloc(...command);
+            case '/allocation':
+                return this.alloc(...command);
 
             case 'rd':
             case 'random':
-            case '/random': return this.random();
+            case '/random':
+                return this.random();
 
             case 'at':
             case 'auto':
-            case '/auto': return this.auto(...command);
+            case '/auto':
+                return this.auto(...command);
 
             case 'x':
             case 'exit':
-            case '/exit': return this.exit(0);
+            case '/exit':
+                return this.exit(0);
 
             case '?':
             case 'h':
@@ -147,26 +164,35 @@ class App {
             case '/?':
             case '/h':
             case '/help':
-            default: return this.help(...command);
+            default:
+                return this.help(...command);
+
+            case 'age':
+                return this.age(...command);
+            case 'state':
+                return this.state();
         }
     }
 
     help(key) {
 
-        switch(key) {
+        switch (key) {
             case 'x':
             case 'exit':
-            case '/exit': return `退出
+            case '/exit':
+                return `退出
     x, exit, /exit      命令同等效果`;
 
             case 'r':
             case 'remake':
-            case '/remake': return `重开
+            case '/remake':
+                return `重开
     r, remake, /remake  命令同等效果`;
 
             case 's':
             case 'select':
-            case '/select': return `选择
+            case '/select':
+                return `选择
     s, select, /select  命令同等效果
 
     Example:    /select 1 2 3 意味着选择 1 2 3 三个天赋
@@ -180,7 +206,8 @@ class App {
 
             case 'u':
             case 'unselect':
-            case '/unselect': return `取消选择
+            case '/unselect':
+                return `取消选择
     u, unselect,
     /unselect           命令同等效果
 
@@ -199,7 +226,8 @@ class App {
             case 'alloc':
             case 'allocation':
             case '/alloc':
-            case '/allocation': return `分配属性点
+            case '/allocation':
+                return `分配属性点
     a, alloc, allocation
     /alloc, /allocation 命令同等效果
 
@@ -227,7 +255,8 @@ class App {
 
             case 'n':
             case 'next':
-            case '/next': return `继续
+            case '/next':
+                return `继续
     n, next, /next      命令同等效果
 
     效果                通常用于各步骤结束后
@@ -239,19 +268,29 @@ class App {
 
             case 'at':
             case 'auto':
-            case '/auto': return `自动播放
+            case '/auto':
+                return `自动播放
     at, auto, /auto    命令同等效果
 
     效果                用于人生的过程中
                         每个年龄会自动下一年
                         播放速度 1 秒 1 年`;
-
+            case 'age':
+                return `设置年龄
+    age 年龄 [事件号或天赋号...] 
+    
+    效果                 跳到指定年龄，并且强制经历指定事件或者强制赋予指定天赋`;
+            case 'state':
+                return `显示当前状态
+    state            
+    效果                 显示当前状态数值`;
             case '?':
             case 'h':
             case 'help':
             case '/?':
             case '/h':
-            case '/help': return `显示帮助
+            case '/help':
+                return `显示帮助
     ？, h, help
     /?, /h, /help           命令同等效果
 
@@ -294,7 +333,10 @@ class App {
     at
     auto
     /auto           自动播放        /auto
-
+    
+    age             跳到指定年龄     age <年龄> [事件ID]...
+    state           显示当前状态     state
+    
     ?
     h
     help
@@ -308,8 +350,8 @@ class App {
         return this.next(true);
     }
 
-    remake(talentRandomMax = 10) {
-        if(this.#talentExtend) {
+    remake() {
+        if (this.#talentExtend) {
             this.#life.talentExtend(this.#talentExtend)
             dumpLocalStorage();
             this.#talentExtend = null;
@@ -317,43 +359,90 @@ class App {
 
         this.#isEnd = false;
         this.#talentSelected.clear();
-        this.#propertyAllocation = {CHR:0,INT:0,STR:0,MNY:0,SPR:5};
+        this.#propertyAllocation = {CHR: 0, INT: 0, STR: 0, MNY: 0, SPR: 5};
         this.#step = this.Steps.TALENT;
-        this.#randomTalents = this.#life.talentRandom(talentRandomMax);
+        this.#randomTalents = this.#life.talentRandom(this.#talentRandomMax);
         return this.list();
     }
 
     select(...select) {
-        switch(this.#step) {
-            case this.Steps.TALENT: return this.talentSelect(...select);
-            case this.Steps.SUMMARY: return this.talentExtend(...select);
+        switch (this.#step) {
+            case this.Steps.TALENT:
+                return this.talentSelect(...select);
+            case this.Steps.SUMMARY:
+                return this.talentExtend(...select);
         }
     }
 
     unselect(...select) {
-        switch(this.#step) {
-            case this.Steps.TALENT: return this.talentUnSelect(...select);
-            case this.Steps.SUMMARY: return this.talentExtendCancle(...select);
+        switch (this.#step) {
+            case this.Steps.TALENT:
+                return this.talentUnSelect(...select);
+            case this.Steps.SUMMARY:
+                return this.talentExtendCancle(...select);
         }
+    }
+
+    age(age, ...eventId) {
+        const warn = str => `${this.list()}\n${this.style('warn', str)}`;
+        const trajectory = this.#life.ageTo(age, eventId);
+        const {ageInt, content, isEnd} = trajectory;
+
+        if (isEnd) this.#isEnd = true;
+        let tmp = String(ageInt);
+        tmp = tmp.split(".");
+        tmp[1] = parseInt(tmp[1]);
+        let season = "春"
+        switch (tmp[1]) {
+            case 1:
+                season = "春";
+                break;
+            case 2:
+                season = "夏";
+                break;
+            case 3:
+                season = "秋";
+                break;
+            case 4:
+                season = "冬";
+                break;
+            default:
+                season = "春";
+        }
+        let result = [];
+        return `${tmp[0]}岁${season}：\t${
+            content.map(c => {
+                    for (let {type, description, grade, name, postEvent} of c) {
+                        switch (type) {
+                            case 'TLT':
+                                result.push(`天赋【${name}】发动：${description}`);
+                            case 'EVT':
+                                result.push(description + (postEvent ? `\n\t${postEvent}` : ''));
+                        }
+                    }
+                    return result;
+                }
+            ).join('\n\t')
+        }`;
     }
 
     talentSelect(...select) {
         const warn = str => `${this.list()}\n${this.style('warn', str)}`;
-        for(const number of select) {
+        for (const number of select) {
             const s = this.#randomTalents[number];
-            if(!s) return warn(`${number} 为未知天赋`);
-            if(this.#talentSelected.has(s)) continue;
-            if(this.#talentSelected.size == 3)
-                return warn('⚠只能选3个天赋');
+            if (!s) return warn(`${number} 为未知天赋`);
+            if (this.#talentSelected.has(s)) continue;
+            if (this.#talentSelected.size == this.#talentMax)
+                return warn(`⚠只能选${this.#talentMax}个天赋`);
 
             const exclusive = this.#life.exclusive(
-                Array.from(this.#talentSelected).map(({id})=>id),
+                Array.from(this.#talentSelected).map(({id}) => id),
                 s.id
             );
 
-            if(exclusive != null)
-                for(const { name, id } of this.#talentSelected)
-                    if(id == exclusive)
+            if (exclusive != null)
+                for (const {name, id} of this.#talentSelected)
+                    if (id == exclusive)
                         return warn(`天赋【${s.name}】与已选择的天赋【${name}】冲突`);
 
             this.#talentSelected.add(s);
@@ -363,9 +452,9 @@ class App {
     }
 
     talentUnSelect(...select) {
-        for(const number of select) {
+        for (const number of select) {
             const s = this.#randomTalents[number];
-            if(this.#talentSelected.has(s))
+            if (this.#talentSelected.has(s))
                 this.#talentSelected.delete(s);
         }
 
@@ -376,7 +465,7 @@ class App {
         const warn = str => `${this.list()}\n${this.style('warn', str)}`;
         const list = Array.from(this.#talentSelected);
         const s = list[select];
-        if(!s) return warn(`${select} 为未知天赋`);
+        if (!s) return warn(`${select} 为未知天赋`);
         this.#talentExtend = s.id;
         return this.list();
     }
@@ -387,51 +476,103 @@ class App {
 
     list() {
         let description, list, check;
-        switch(this.#step) {
+        switch (this.#step) {
             case this.Steps.TALENT:
-                description = '🎉 请选择3个天赋';
+                description = `🎉 请选择${this.#talentMax}个天赋`;
                 list = this.#randomTalents;
-                check = talent=>this.#talentSelected.has(talent);
+                check = talent => this.#talentSelected.has(talent);
                 break;
             case this.Steps.SUMMARY:
                 description = '🎉 你可以选一个天赋继承';
                 list = Array.from(this.#talentSelected);
-                check = ({id})=>this.#talentExtend == id;
+                check = ({id}) => this.#talentExtend == id;
                 break;
         }
-        if(!list) return '';
+        if (!list) return '';
 
         return [description, list.map(
-                (talent, i) =>
-                    this.style(
-                        `grade${talent.grade}b`,
-                        `${check(talent)?'√':' '} ${i} ${talent.name}（${talent.description}）`
-                    )
-            )]
+            (talent, i) =>
+                this.style(
+                    `grade${talent.grade}b`,
+                    `${check(talent) ? '√' : ' '} ${i} ${talent.name}（${talent.description}）`
+                )
+        )]
             .flat()
             .join('\n');
     }
 
+    addDefaultTalent() {
+        const selected = this.#talentSelected;
+        if (this.#defaultTalents) {
+            const propertyType = this.#life.getPropertyType();
+            const cachvType = propertyType.CACHV
+            const cachv = this.#life.getProperty(cachvType);
+            const talent = [];
+            const talentsId = this.#defaultTalents;
+            for (let key in talentsId) {
+                let isPass = false;
+                if (cachv < parseInt(key)) {
+                    isPass = true;
+                    continue;
+                }
+                for (let value of talentsId[key]) {
+                    isPass = false;
+                    for (let t of selected.values()) {
+                        if (t.id === value) {
+                            isPass = true;
+                            break;
+                        }
+                    }
+                    if (isPass) {
+                        continue;
+                    }
+                    talent.push(this.#life.getTalent(value));
+                }
+            }
+            if (talent) {
+                talent.forEach(t => {
+                    this.#talentSelected.add(t);
+                })
+
+                const sorted = Array.from(this.#talentSelected).sort((a, b) => {
+                    let result = b.grade - a.grade;
+                    if (result === 0) {
+                        result = a.id - b.id;
+                    }
+                    return result;
+                })
+                this.#talentSelected.clear();
+                sorted.forEach(v => {
+                    this.#talentSelected.add(v);
+                })
+            }
+        }
+    }
+
     next(enter, talentRandomMax = 10) {
         const warn = (a, b) => `${a}\n${this.style('warn', this.style('warn', b))}`;
-        switch(this.#step) {
+        switch (this.#step) {
             case this.Steps.TALENT:
-                if(this.#talentSelected.size != 3) return warn(this.list(), `⚠请选择3个天赋`);
+                if (this.#talentSelected.size != this.#talentMax) return warn(this.list(), `⚠请选择${this.#talentMax}个天赋`);
+                // 已经选完天赋
+                this.addDefaultTalent()
+                // this.#talentSelected.add(this.#life.getTalent(1048));
+
                 this.#step = this.Steps.PROPERTY;
                 this.#propertyAllocation.total = 20 + this.#life.getTalentAllocationAddition(
-                    Array.from(this.#talentSelected).map(({id})=>id)
+                    Array.from(this.#talentSelected).map(({id}) => id)
                 );
-                this.#propertyAllocation.TLT = Array.from(this.#talentSelected).map(({id})=>id);
+                this.#propertyAllocation.TLT = Array.from(this.#talentSelected).map(({id}) => id);
                 return this.prop();
             case this.Steps.PROPERTY:
                 const less = this.less();
-                if(less > 0) return warn(this.prop(), `你还有${less}属性点没有分配完`);
+                if (less > 0) return warn(this.prop(), `你还有${less}属性点没有分配完`);
                 this.#step = this.Steps.TRAJECTORY;
                 delete this.#propertyAllocation.total;
                 this.#life.restart(this.#propertyAllocation);
                 return this.trajectory(enter);
             case this.Steps.TRAJECTORY:
-                if(!this.#isEnd) return this.trajectory(enter);
+                if (!this.#isEnd) return this.trajectory(enter);
                 this.#step = this.Steps.SUMMARY;
                 return `${
                     this.summary()
@@ -444,58 +585,123 @@ class App {
     }
 
     trajectory(enter) {
-        if(enter) {
-            if(this.#interval) {
+        if (enter) {
+            if (this.#interval) {
                 clearInterval(this.#interval);
                 this.#interval = null;
                 this.#auto = false;
-            } else if(this.#auto) {
+            } else if (this.#auto) {
                 this.#interval = setInterval(
-                    ()=>{
+                    () => {
                         const trajectory = this.next();
-                        if(this.#isEnd && this.#interval) {
+                        if (this.#isEnd && this.#interval) {
                             clearInterval(this.#interval);
                             this.#interval = null;
                         }
-                        if(!this.#isEnd) return this.output(`${trajectory}\n`);
+                        if (!this.#isEnd) return this.output(`${trajectory}\n`);
                         return this.output(trajectory, true);
                     }
-                , 1000);
+                    , 300);
                 return;
             }
         }
+        const type = this.#life.getPropertyType();
+        const snapshotCHR = this.#life.getProperty(type.CHR);
+        const snapshotINT = this.#life.getProperty(type.INT);
+        const snapshotSTR = this.#life.getProperty(type.STR);
+        const snapshotMNY = this.#life.getProperty(type.MNY);
+        const snapshotAGE = this.#life.getProperty(type.AGE);
+        const snapshotTLT = this.#life.getProperty(type.TLT);
 
         const trajectory = this.#life.next();
-        const { age, content, isEnd } = trajectory;
-        if(isEnd) this.#isEnd = true;
+
+        const {age, content, isEnd} = trajectory;
+
+        const CHR = this.#life.getProperty(type.CHR);
+        const INT = this.#life.getProperty(type.INT);
+        const STR = this.#life.getProperty(type.STR);
+        const MNY = this.#life.getProperty(type.MNY);
+        const AGE = this.#life.getProperty(type.AGE);
+        const TLT = this.#life.getProperty(type.TLT);
+        let diff = "";
+        if (snapshotCHR != CHR) {
+            diff += `\n\t      颜值(CHR) ${snapshotCHR} → ${CHR}`
+        }
+
+        if (snapshotINT != INT) {
+            diff += `\n\t      智力(INT) ${snapshotINT} → ${INT}`
+        }
+
+        if (snapshotSTR != STR) {
+            diff += `\n\t      体质(STR) ${snapshotSTR} → ${STR}`
+        }
+
+        if (snapshotMNY != MNY) {
+            diff += `\n\t      家境(MNY) ${snapshotMNY} → ${MNY}`
+        }
+
+
+        if (isEnd) this.#isEnd = true;
         let tmp = String(age);
         tmp = tmp.split(".");
         tmp[1] = parseInt(tmp[1]);
         let season = "春"
-        switch (tmp[1]){
-            case 1:season = "春"; break;
-            case 2:season = "夏"; break;
-            case 3:season = "秋"; break;
-            case 4:season = "冬"; break;
+        switch (tmp[1]) {
+            case 1:
+                season = "春";
+                break;
+            case 2:
+                season = "夏";
+                break;
+            case 3:
+                season = "秋";
+                break;
+            case 4:
+                season = "冬";
+                break;
             default:
                 season = "春";
         }
-        return `${tmp[0]}岁${season}：\t${
+        let result = `${tmp[0]}岁${season}：\t${
             content.map(
                 ({type, description, grade, name, postEvent}) => {
-                    switch(type) {
+                    switch (type) {
                         case 'TLT':
                             return `天赋【${name}】发动：${description}`;
                         case 'EVT':
-                            return description + (postEvent?`\n\t${postEvent}`:'');
+                            return description + (postEvent ? `\n\t${postEvent}` : '');
                     }
                 }
-            ).join('\n\t')
+            ).join(`\n\t`)
         }`;
+        if(diff.length > 0) {
+            result +=  diff
+        }
+        return result;
     }
 
+    state() {
+        const type = this.#life.getPropertyType();
+        const CHR = this.#life.getProperty(type.CHR);
+        const INT = this.#life.getProperty(type.INT);
+        const STR = this.#life.getProperty(type.STR);
+        const MNY = this.#life.getProperty(type.MNY);
+        const AGE = this.#life.getProperty(type.AGE);
+        const TLT = this.#life.getProperty(type.TLT);
+        return `
+属性(TAG)       当前值
+年龄(AGE)         ${AGE}
+颜值(CHR)         ${CHR}
+智力(INT)         ${INT}
+体质(STR)         ${STR}
+家境(MNY)         ${MNY}
+天赋(TLT)         ${TLT}
+        `
+    }
+
+
     prop() {
-        const { CHR, INT, STR, MNY } = this.#propertyAllocation;
+        const {CHR, INT, STR, MNY} = this.#propertyAllocation;
         return `🎉属性分配
 剩余点数 ${this.less()}
 
@@ -508,68 +714,77 @@ class App {
     }
 
     less() {
-        const { total, CHR, INT, STR, MNY } = this.#propertyAllocation;
+        const {total, CHR, INT, STR, MNY} = this.#propertyAllocation;
         return total - CHR - INT - STR - MNY;
     }
 
+
     alloc(tag, value) {
         const warn = str => `${this.prop()}\n${this.style('warn', str)}`
-        if(!value) return warn('⚠ 分配的数值没有给定');
-        const isSet = !(value[0] == '-'|| value[0] == '+');
+        if (!value) return warn('⚠ 分配的数值没有给定');
+        const isSet = !(value[0] == '-' || value[0] == '+');
 
         value = Number(value);
-        if(isNaN(value)) return warn('⚠ 分配的数值不正确');
+        if (isNaN(value)) return warn('⚠ 分配的数值不正确');
 
-        switch(tag) {
+        switch (tag) {
             case 'c':
             case 'chr':
-            case 'C': tag = 'CHR'; break;
+            case 'C':
+                tag = 'CHR';
+                break;
             case 'i':
             case 'int':
-            case 'I': tag = 'INT'; break;
+            case 'I':
+                tag = 'INT';
+                break;
             case 's':
             case 'S':
-            case 'str': tag = 'STR'; break;
+            case 'str':
+                tag = 'STR';
+                break;
             case 'm':
             case 'M':
-            case 'mny': tag = 'MNY'; break;
+            case 'mny':
+                tag = 'MNY';
+                break;
         }
 
 
-        switch(tag) {
+        switch (tag) {
             case 'CHR':
             case 'INT':
             case 'STR':
             case 'MNY':
-                if(isSet) value = value - this.#propertyAllocation[tag];
+                if (isSet) value = value - this.#propertyAllocation[tag];
 
                 const tempLess = this.less() - value;
                 const tempSet = this.#propertyAllocation[tag] + value;
 
-                if(tempLess<0) return  warn('⚠ 你没有更多的点数可以分配了');
-                if(
-                    tempLess>this.#propertyAllocation.total
+                if (tempLess < 0) return warn('⚠ 你没有更多的点数可以分配了');
+                if (
+                    tempLess > this.#propertyAllocation.total
                     || tempSet < 0
-                ) return  warn('⚠ 不能分配负数属性');
-                if(tempSet>10) return  warn('⚠ 单项属性最高分配10点');
+                ) return warn('⚠ 不能分配负数属性');
+                if (tempSet > 10) return warn('⚠ 单项属性最高分配10点');
 
                 this.#propertyAllocation[tag] += value;
 
                 return this.prop();
 
             default:
-                return  warn('⚠ 未知的tag');
+                return warn('⚠ 未知的tag');
         }
     }
 
     random() {
         let t = this.#propertyAllocation.total;
         const arr = [10, 10, 10, 10];
-        while(t>0) {
+        while (t > 0) {
             const sub = Math.round(Math.random() * (Math.min(t, 10) - 1)) + 1;
-            while(true) {
+            while (true) {
                 const select = Math.floor(Math.random() * 4) % 4;
-                if(arr[select] - sub <0) continue;
+                if (arr[select] - sub < 0) continue;
                 arr[select] -= sub;
                 t -= sub;
                 break;
@@ -586,7 +801,7 @@ class App {
         const summaryData = this.#life.getSummary();
         const format = (name, type) => {
             const value = summaryData[type];
-            const { judge, grade } = summary(type, value);
+            const {judge, grade} = summary(type, value);
             return this.style(`grade${grade}b`, `${name}：${value} ${judge}`);
         }
 

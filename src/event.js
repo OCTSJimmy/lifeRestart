@@ -37,6 +37,11 @@ class Event {
         return clone(event);
     }
 
+    getWithoutException(eventId) {
+        const event = this.#events[eventId];
+        return clone(event);
+    }
+
     information(eventId) {
         const { event: description } = this.get(eventId)
         return { description };

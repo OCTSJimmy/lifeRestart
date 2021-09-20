@@ -69,6 +69,60 @@ class Life {
         return {age, content, isEnd};
     }
 
+    ageTo(age, eventId) {
+        const {ageInt, event, talent} = this.#property.ageTo(age);
+        let talentContent;
+        let eventContent
+        if (talent !== undefined && talent) {
+            let tlt = this.#property.get(this.#property.TYPES.TLT);
+            if (tlt.map(({id}) => id).indexOf(talent.id) === -1) {
+                tlt = tlt.push(talent)
+                this.#property.set(this.#property.TYPES.TLT, tlt);
+            }
+            talentContent = this.doTalent(talent);
+        }
+        if (event !== undefined && event) {
+            let rndEvent = this.random(event);
+            if (rndEvent !== undefined && event) {
+                eventContent = this.doEvent(rndEvent);
+            }
+        }
+        let isEnd = this.#property.isEnd();
+        let content = [];
+        if(talentContent && eventContent) {
+            content.push([talentContent, eventContent].flat());
+        }
+        this.#achievement.achieve(
+            this.#achievement.Opportunity.TRAJECTORY,
+            this.#property
+        )
+
+        for (let id of eventId) {
+            let item = this.#event.getWithoutException(id);
+            if (item === undefined || !item) {
+                item = this.getTalentWithoutException(id);
+                if (item === undefined || !item) continue;
+                talentContent = this.doTalent([id]);
+                eventContent = "";
+            } else {
+                if (item) {
+                    eventContent = this.doEvent(id);
+                    talentContent = "";
+                }
+            }
+            isEnd = this.#property.isEnd();
+            if (isEnd) {
+                break;
+            }
+            content.push([talentContent, eventContent].flat());
+            this.#achievement.achieve(
+                this.#achievement.Opportunity.TRAJECTORY,
+                this.#property
+            )
+        }
+        return {ageInt, content, isEnd};
+    }
+
     talentReplace(talents) {
         const result = this.#talent.replace(talents);
         const contents = [];
@@ -131,16 +185,23 @@ class Life {
     talentRandom(talentRandomMax = 10) {
         const times = this.#property.get(this.#property.TYPES.TMS);
         const achievement = this.#property.get(this.#property.TYPES.CACHV);
-        return this.#talent.talentRandom(this.getLastExtendTalent(), {times, achievement},talentRandomMax);
+        return this.#talent.talentRandom(this.getLastExtendTalent(), {times, achievement}, talentRandomMax);
     }
-    getProperty(type){
+
+    getProperty(type) {
         return this.#property.get(type);
     }
-    getPropertyType(){
+
+    getPropertyType() {
         return this.#property.TYPES;
     }
+
     getTalent(talentId) {
         return this.#talent.get(talentId);
+    }
+
+    getTalentWithoutException(talentId) {
+        return this.#talent.getWithoutException(talentId);
     }
 
     talentExtend(talentId) {

@@ -41,7 +41,10 @@ class Talent {
         if(!talent) throw new Error(`[ERROR] No Talent[${talentId}]`);
         return clone(talent);
     }
-
+    getWithoutException(talentId) {
+        const talent = this.#talents[talentId];
+        return clone(talent);
+    }
     information(talentId) {
         const { grade, name, description } = this.get(talentId)
         return { grade, name, description };
