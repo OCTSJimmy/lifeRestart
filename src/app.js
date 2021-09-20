@@ -12,8 +12,8 @@ class App {
     #currentPage;
     #talentSelected = new Set();
     #totalMax = 20;
-    #talentMax = 3;
-    #talentRandomMax = 10;
+    #talentMax = 7;
+    #talentRandomMax = 60;
     #isEnd = false;
     #selectedExtendTalent = null;
     #hintTimeout;
