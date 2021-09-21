@@ -12,8 +12,12 @@ class App {
     #currentPage;
     #talentSelected = new Set();
     #totalMax = 20;
-    #talentMax = 3;
-    #talentRandomMax = 10;
+    #TALENT_MAX = 3;
+    #TALENT_RANDOM_MAX = 10;
+    #TALENT_EASY_MAX = 7;
+    #TALENT_RANDOM_EASY_MAX = 60;
+    #currentTalentMax = this.#TALENT_MAX;
+    #currentTalentRandomMax = this.#TALENT_RANDOM_MAX;
     #isEnd = false;
     #selectedExtendTalent = null;
     #hintTimeout;
@@ -204,117 +208,165 @@ class App {
         const talentPage = $(`
         <div id="main">
             <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
-            <button id="random" class="mainbtn" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"">${this.#talentRandomMax}连抽！</button>
+            <button id="random" class="mainbtn" style="position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);"">${this.#TALENT_RANDOM_MAX}连抽！</button>
+            <button id="randomEasy" class="mainbtn" style="position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%);"">${this.#TALENT_RANDOM_EASY_MAX}连抽！</button>
             <ul id="talents" class="selectlist"></ul>
-            <button id="next" class="mainbtn">请选择${this.#talentMax}个</button>
+            <div id="nextContainer"  class="btn-area">
+                <button id="next" class="mainbtn">请选择${this.#currentTalentMax}个天赋</button>
+                <button id="nextEasy" class="mainbtn">开始简单人生</button>
+            </div> 
         </div>
         `);
 
         const createTalent = ({grade, name, description}) => {
             return $(`<li class="grade${grade}b">${name}（${description}）</li>`)
         };
+        // talentPage.find("#nextEasy").hide();
 
+        const random = () => {
+            talentPage.find('#random').hide();
+            talentPage.find('#randomEasy').hide();
+            const ul = talentPage.find('#talents');
+            this.#life.talentRandom(this.#currentTalentRandomMax)
+                .forEach(talent => {
+                    const li = createTalent(talent);
+                    ul.append(li);
+                    li.click(() => {
+                        if (li.hasClass('selected')) {
+                            li.removeClass('selected')
+                            this.#talentSelected.delete(talent);
+                            if (this.#talentSelected.size < this.#currentTalentMax) {
+                                talentPage.find('#next').text(`请选择${this.#currentTalentMax}个天赋`)
+                                talentPage.find('#nextEasy').hide();
+                            }
+                        } else {
+                            if (this.#talentSelected.size == this.#currentTalentMax) {
+                                this.hint(`只能选${this.#currentTalentMax}个天赋`);
+                                return;
+                            }
+
+                            const exclusive = this.#life.exclusive(
+                                Array.from(this.#talentSelected).map(({id}) => id),
+                                talent.id
+                            );
+                            if (exclusive != null) {
+                                for (const {name, id} of this.#talentSelected) {
+                                    if (id == exclusive) {
+                                        this.hint(`与已选择的天赋【${name}】冲突`);
+                                        return;
+                                    }
+                                }
+                                return;
+                            }
+                            li.addClass('selected');
+                            this.#talentSelected.add(talent);
+                            if (this.#talentSelected.size == this.#currentTalentMax) {
+                                talentPage.find('#next').text('开始新人生')
+                                talentPage.find('#nextEasy').show();
+                            } else {
+                                talentPage.find('#nextEasy').hide();
+                                talentPage.find('#next').text(`请选择${this.#currentTalentMax}个天赋`)
+                            }
+                        }
+                    });
+                });
+            talentPage.find('#next').text(`请选择${this.#currentTalentMax}个天赋`);
+            talentPage.find('#next').show();
+        }
+
+        talentPage
+            .find('#randomEasy')
+            .click(() => {
+                this.#currentTalentMax = this.#TALENT_EASY_MAX;
+                this.#currentTalentRandomMax = this.#TALENT_RANDOM_EASY_MAX;
+                random();
+            });
         talentPage
             .find('#random')
             .click(() => {
-                talentPage.find('#random').hide();
-                const ul = talentPage.find('#talents');
-                this.#life.talentRandom(this.#talentRandomMax)
-                    .forEach(talent => {
-                        const li = createTalent(talent);
-                        ul.append(li);
-                        li.click(() => {
-                            if (li.hasClass('selected')) {
-                                li.removeClass('selected')
-                                this.#talentSelected.delete(talent);
-                                if (this.#talentSelected.size < this.#talentMax) {
-                                    talentPage.find('#next').text(`请选择${this.#talentMax}个天赋`)
-                                }
-                            } else {
-                                if (this.#talentSelected.size == this.#talentMax) {
-                                    this.hint(`只能选${this.#talentMax}个天赋`);
-                                    return;
-                                }
-
-                                const exclusive = this.#life.exclusive(
-                                    Array.from(this.#talentSelected).map(({id}) => id),
-                                    talent.id
-                                );
-                                if (exclusive != null) {
-                                    for (const {name, id} of this.#talentSelected) {
-                                        if (id == exclusive) {
-                                            this.hint(`与已选择的天赋【${name}】冲突`);
-                                            return;
-                                        }
-                                    }
-                                    return;
-                                }
-                                li.addClass('selected');
-                                this.#talentSelected.add(talent);
-                                if (this.#talentSelected.size == this.#talentMax) {
-                                    talentPage.find('#next').text('开始新人生')
-                                } else {
-                                    talentPage.find('#next').text(`请选择${this.#talentMax}个天赋`)
-                                }
-                            }
-                        });
-                    });
-                talentPage.find('#next').show()
+                random();
             });
 
+        const addDefaultTalent = (selected) => {
+            if (this.#defaultTalents) {
+                const propertyType = this.#life.getPropertyType();
+                const cachvType = propertyType.CACHV
+                const cachv = this.#life.getProperty(cachvType);
+                const talent = [];
+                const talentsId = this.#defaultTalents;
+                for (let key in talentsId) {
+                    let isPass = false;
+                    if (cachv < parseInt(key)) {
+                        isPass = true;
+                        continue;
+                    }
+                    for (let value of talentsId[key]) {
+                        isPass = false;
+                        for (let t of selected.values()) {
+                            if (t.id === value) {
+                                isPass = true;
+                                break;
+                            }
+                        }
+                        if (isPass) {
+                            continue;
+                        }
+                        talent.push(this.#life.getTalent(value));
+                    }
+                }
+                if (talent) {
+                    talent.forEach(t => {
+                        this.#talentSelected.add(t);
+                    })
+
+                    const sorted = Array.from(this.#talentSelected).sort((a, b) => {
+                        let result = b.grade - a.grade;
+                        if (result === 0) {
+                            result = a.id - b.id;
+                        }
+                        return result;
+                    })
+                    this.#talentSelected.clear();
+                    sorted.forEach(v => {
+                        this.#talentSelected.add(v);
+                    })
+                }
+            }
+        }
+
+        const next = () => {
+            talentPage.find('#next').disabled = true;
+            talentPage.find('#nextEasy').disabled = true;
+            if (this.#talentSelected.size !== this.#currentTalentMax) {
+                this.hint(`请选择${this.#currentTalentMax}个天赋`);
+                talentPage.find('#next').disabled = false;
+                talentPage.find('#nextEasy').disabled = false;
+                return false;
+            }
+
+            talentPage.find('#next').hide()
+            talentPage.find('#nextEasy').hide()
+            talentPage.find('#next').disabled = false;
+            talentPage.find('#nextEasy').disabled = false;
+            return true;
+        }
+
+        talentPage
+            .find('#nextEasy')
+            .click(()=>{
+                if(!next()) return;
+
+                const selected = this.#talentSelected;
+                addDefaultTalent(selected);
+
+                this.#totalMax = 20 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({id}) => id));
+                this.switch('property');
+            })
         talentPage
             .find('#next')
             .click(() => {
-                if (this.#talentSelected.size != this.#talentMax) {
-                    this.hint(`请选择${this.#talentMax}个天赋`);
-                    return;
-                }
-                talentPage.find('#next').hide()
-                const selected = this.#talentSelected;
-                if (this.#defaultTalents) {
-                    const propertyType = this.#life.getPropertyType();
-                    const cachvType = propertyType.CACHV
-                    const cachv = this.#life.getProperty(cachvType);
-                    const talent = [];
-                    const talentsId = this.#defaultTalents;
-                    for (let key in talentsId) {
-                        let isPass = false;
-                        if (cachv < parseInt(key)) {
-                            isPass = true;
-                            continue;
-                        }
-                        for (let value of talentsId[key]) {
-                            isPass = false;
-                            for (let t of selected.values()) {
-                                if (t.id === value) {
-                                    isPass = true;
-                                    break;
-                                }
-                            }
-                            if (isPass) {
-                                continue;
-                            }
-                            talent.push(this.#life.getTalent(value));
-                        }
-                    }
-                    if (talent) {
-                        talent.forEach(t => {
-                            this.#talentSelected.add(t);
-                        })
+                if(!next()) return;
 
-                        const sorted = Array.from(this.#talentSelected).sort((a, b) => {
-                            let result = b.grade - a.grade;
-                            if (result === 0) {
-                                result = a.id - b.id;
-                            }
-                            return result;
-                        })
-                        this.#talentSelected.clear();
-                        sorted.forEach(v => {
-                            this.#talentSelected.add(v);
-                        })
-                    }
-                }
                 this.#totalMax = 20 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({id}) => id));
                 this.switch('property');
             })
@@ -764,10 +816,12 @@ class App {
                 talentList: talentPage.find('#talents'),
                 btnRandom: talentPage.find('#random'),
                 btnNext: talentPage.find('#next'),
+                btnNextEasy: talentPage.find('#nextEasy'),
                 pressEnter: () => {
                     const talentList = this.#pages.talent.talentList;
                     const btnRandom = this.#pages.talent.btnRandom;
                     const btnNext = this.#pages.talent.btnNext;
+                    const btnNextEasy = this.#pages.talent.btnNextEasy;
                     if (talentList.children().length) {
                         btnNext.click();
                     } else {
@@ -778,6 +832,7 @@ class App {
                     this.#currentPage = 'talent';
                     talentPage.find('ul.selectlist').empty();
                     talentPage.find('#random').show();
+                    talentPage.find('#randomEasy').show();
                     this.#totalMax = 20;
                 },
             },

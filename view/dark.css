@@ -101,6 +101,9 @@ body {
 #next {
   display: none;
 }
+#nextEasy {
+  display: none;
+}
 
 .mainbtn {
   margin: 0.5rem 1rem 1rem;
