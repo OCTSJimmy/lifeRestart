@@ -17,7 +17,7 @@
 1. 下载项目代码。
 
 ```bash
-git clone https://github.com/VickScarlet/lifeRestart.git my-project
+git clone https://github.com/OCTSJimmy/lifeRestart.git my-project
 cd my-project
 ```
 
@@ -58,5 +58,5 @@ node repl
 ```
 
 </details>
-
+> 测试http://ss.elune.top 
 > 更多信息请参考 [官网文档](https://liferestart.syaro.io/)。
