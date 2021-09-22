@@ -17,7 +17,7 @@ English | [简体中文](./README-zh_CN.md)
 1. Clone project code.
 
 ```bash
-git clone git@github.com:VickScarlet/lifeRestart.git my-project
+git clone git@github.com:OCTSJimmy/lifeRestart.git my-project
 cd my-project
 ```
 
@@ -57,5 +57,6 @@ node repl
 ```
 
 </details>
+> Test http://ss.elune.top
 
 > More instructions at [documentation](https://liferestart.syaro.io/).
