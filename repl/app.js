@@ -51,9 +51,9 @@ class App {
         grade1: ['\x1B[94m', '\x1B[39m'], // Bright Blue
         grade2: ['\x1B[95m', '\x1B[39m'], // Bright Magenta
         grade3: ['\x1B[93m', '\x1B[39m'], // Bright Yellow
-        grade1b: ['\x1B[104m', '\x1B[49m'], // Bright Blue BG
-        grade2b: ['\x1B[105m', '\x1B[49m'], // Bright Magenta BG
-        grade3b: ['\x1B[103m', '\x1B[49m'], // Bright Yellow BG
+        grade1b: ['\x1B[94m\x1B[7m', '\x1B[0m'], // Bright Blue BG
+        grade2b: ['\x1B[95m\x1B[7m', '\x1B[0m'], // Bright Magenta BG
+        grade3b: ['\x1B[93m\x1B[7m', '\x1B[0m'], // Bright Yellow BG
     };
     #randomTalents;
     #TALENT_MAX = 3;
@@ -149,10 +149,13 @@ class App {
                 return this.easy(true, this.#currentTalentRandomMax);
             case 'a':
             case 'alloc':
-            case 'allocation':
+            case 'allocate':
+            case 'attrib':
+            case 'attribute':
             case '/alloc':
-            case '/allocation':
-                return this.alloc(...command);
+            case '/allocate':
+            case '/attrib':
+            case '/attribute': return this.attrib(...command);
 
             case 'rd':
             case 'random':
@@ -236,18 +239,25 @@ class App {
 
             case 'a':
             case 'alloc':
-            case 'allocation':
+            case 'allocate':
+            case 'attrib':
+            case 'attribute':
             case '/alloc':
-            case '/allocation':
-                return `分配属性点
-    a, alloc, allocation
-    /alloc, /allocation 命令同等效果
+            case '/allocate':
+            case '/attrib':
+            case '/attribute': return `分配或查看属性点
+    a, alloc, allocate, attrib, attribute
+    /alloc, /allocate, /attrib, /attribute 命令同等效果
 
-    Example:    /allocation STR 1
-                /allocation INT -3
-                /allocation CHR +5
+    Example:    /attribute
+                /allocate STR 1
+                /allocate INT -3
+                /allocate CHR +5
 
-    参数解释    /allocation <TAG> <[+/-]value>
+    效果        在属性分配时分配属性点
+                在人生的过程中查看当前属性点
+
+    参数解释    /allocate <TAG> <[+/-]value>
 
                 <TAG>   表示要分配的属性标签
                         可选有
@@ -341,9 +351,13 @@ class App {
 
     a
     alloc
-    allocation
+    allocate
+    attrib
+    attribute
     /alloc
-    /allocation     分配属性点      /allocation <TAG> <[+/-]value>
+    /allocate
+    /attrib
+    /attribute      分配或查看属性点 /allocate <TAG> <[+/-]value>
 
     n
     next
@@ -512,7 +526,7 @@ class App {
                 check = talent => this.#talentSelected.has(talent);
                 break;
             case this.Steps.SUMMARY:
-                description = '🎉 你可以选一个天赋继承';
+                description = '🎉 你可以选（\x1B[4m/select\x1B[24m）一个天赋继承';
                 list = Array.from(this.#talentSelected);
                 check = ({id}) => this.#talentExtend == id;
                 break;
@@ -802,6 +816,30 @@ class App {
         return total - CHR - INT - STR - MNY;
     }
 
+    attrib(tag, value) {
+        switch (this.#step) {
+            case this.Steps.PROPERTY:
+                return this.alloc(tag, value);
+
+            case this.Steps.TRAJECTORY:
+                return this.showProperty();
+
+            default:
+                return undefined;
+        }
+    }
+
+    showProperty() {
+        let property = this.#life.getLastRecord();
+        return `当前属性
+
+属性(TAG)       当前值
+颜值(CHR)         ${property.CHR}
+智力(INT)         ${property.INT}
+体质(STR)         ${property.STR}
+家境(MNY)         ${property.MNY}
+快乐(SPR)         ${property.SPR}`
+    }
 
     alloc(tag, value) {
         const warn = str => `${this.prop()}\n${this.style('warn', str)}`

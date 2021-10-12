@@ -58,6 +58,16 @@ node repl
 
 </details>
 
+## Other Version
+
+<details>
+<summary><strong>Versions</strong></summary>
+<br />
+
+- Cocos Ver: [gameall3d/LifeRestart_Cocos](https://github.com/gameall3d/LifeRestart_Cocos)
+
+</details>
+
 > Test http://ss.elune.top
 
 > More instructions at [documentation](https://liferestart.syaro.io/).
