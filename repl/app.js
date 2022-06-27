@@ -1,6 +1,6 @@
-import {summary} from '../src/functions/summary.js'
-import {readFile} from 'fs/promises';
-import Life from '../src/life.js';
+import { summary } from '../src/functions/summary.js'
+import { readFile } from 'fs/promises';
+import Life from '../src/modules/life.js';
 
 globalThis.json = async fileName => JSON.parse(await readFile(`data/${fileName}.json`));
 
@@ -478,8 +478,8 @@ class App {
             if (this.#talentSelected.size == this.#currentTalentMax)
                 return warn(`⚠只能选${this.#currentTalentMax}个天赋`);
 
-            const exclusive = this.#life.exclusive(
-                Array.from(this.#talentSelected).map(({id}) => id),
+            const exclusive = this.#life.exclude(
+                Array.from(this.#talentSelected).map(({id})=>id),
                 s.id
             );
 
